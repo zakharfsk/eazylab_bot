@@ -13,10 +13,6 @@ class DataBase:
             password=os.getenv('PASSWORD'),
             port=5432
         )
-        logging.info(os.getenv('USER'))
-        logging.info(os.getenv('HOST'))
-        logging.info(os.getenv('DATABASE'))
-        logging.info(os.getenv('PASSWORD'))
         self.cursor = self.conn.cursor()
         logging.info('Connected to database')
 
@@ -33,6 +29,10 @@ class User(DataBase):
         super().__init__()
 
     def get_user_by_id(self, user_id: int) -> tuple:
+        logging.info(os.getenv('USER'))
+        logging.info(os.getenv('HOST'))
+        logging.info(os.getenv('DATABASE'))
+        logging.info(os.getenv('PASSWORD'))
         self.cursor.execute(f'SELECT id FROM user_info WHERE id = {user_id};')
         return self.cursor.fetchone()
 
