@@ -1,0 +1,5 @@
+from handlers import handler_price_programming
+from handlers import handler_price_IT
+from handlers import handler_price_hight_math
+from handlers import handler_price_english
+from handlers import handler_price_web
