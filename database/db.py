@@ -1,6 +1,7 @@
 import os
 import logging
 import mysql.connector
+import sqlite3
 
 
 class DataBase:
@@ -13,7 +14,7 @@ class DataBase:
     }
 
     def __int__(self):
-        self.conn = mysql.connector.connect(**self.config)
+        self.conn = sqlite3.connect('database.db')
         self.cursor = self.conn.cursor()
         logging.info('Connected to database')
 
@@ -26,8 +27,6 @@ class DataBase:
 
 
 class User(DataBase):
-    def __init__(self):
-        super().__init__()
 
     def get_user_by_id(self, user_id: int) -> tuple:
         logging.info(os.getenv('USER_DB'))
