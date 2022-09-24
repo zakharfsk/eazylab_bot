@@ -5,11 +5,17 @@ SECOND_MAN = 876045214  # Vadim
 CHAT = -1001703899156  # General Chat
 ADMIN_CHAT = -1001714594820
 
-TOKEN = os.environ.get('TOKEN')
-USER = os.environ.get('USER')
-HOST = os.environ.get('HOST')
-DATABASE = os.environ.get('DATABASE')
-PASSWORD = os.environ.get('PASSWORD')
+TOKEN = os.getenv('TOKEN')
+USER = os.getenv('USER')
+HOST = os.getenv('HOST')
+DATABASE = os.getenv('DATABASE')
+PASSWORD = os.getenv('PASSWORD')
+
+print(TOKEN)
+print(USER)
+print(HOST)
+print(DATABASE)
+print(PASSWORD)
 
 start_buttons = [
     '👨‍🏫 Подивитися прайс',
