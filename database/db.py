@@ -7,10 +7,10 @@ import psycopg2
 class DataBase:
     def __int__(self):
         self.conn = psycopg2.connect(
-            user=os.getenv('USER'),
-            host=os.getenv('HOST'),
-            database=os.getenv('DATABASE'),
-            password=os.getenv('PASSWORD'),
+            user=os.getenv('USER_DB'),
+            host=os.getenv('HOST_DB'),
+            database=os.getenv('DATABASE_DB'),
+            password=os.getenv('PASSWORD_DB'),
             port=5432
         )
         self.cursor = self.conn.cursor()
@@ -29,10 +29,10 @@ class User(DataBase):
         super().__init__()
 
     def get_user_by_id(self, user_id: int) -> tuple:
-        logging.info(os.getenv('USER'))
-        logging.info(os.getenv('HOST'))
-        logging.info(os.getenv('DATABASE'))
-        logging.info(os.getenv('PASSWORD'))
+        logging.info(os.getenv('USER_DB'))
+        logging.info(os.getenv('HOST_DB'))
+        logging.info(os.getenv('DATABASE_DB'))
+        logging.info(os.getenv('PASSWORD_DB'))
         self.cursor.execute(f'SELECT id FROM user_info WHERE id = {user_id};')
         return self.cursor.fetchone()
 
