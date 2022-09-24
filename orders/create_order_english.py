@@ -1,21 +1,15 @@
 import logging
 import uuid
 
-import psycopg2
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config import USER, HOST, DATABASE, PASSWORD, OWNER, select_object_buttons, ADMIN_CHAT
+from config import OWNER, select_object_buttons, ADMIN_CHAT
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu
-
-username = USER
-host = HOST
-database = DATABASE
-password = PASSWORD
-port = 5432
+from database.db import Orders
 
 
 class Order(StatesGroup):
@@ -102,30 +96,17 @@ async def input_task(message: types.Message, state: FSMContext):
 
         data = await state.get_data()
 
-        await message.answer(f'{data}')
-
-        conn = psycopg2.connect(
-            user=username,
-            host=host,
-            database=database,
-            password=password,
-            port=port
-        )
-        cursor = conn.cursor()
+        order_db = Orders()
 
         if message.from_user.id != OWNER:
-            cursor.execute(
-                'INSERT INTO public.order_info_english(id_order, id_customer, name_object, user_group, file_id, task) '
-                f'VALUES ('
-                f'{data["order_id"]}, '
-                f'{data["customer_id"]}, '
-                f'\'{data["select_object"]}\', '
-                f'\'{data["user_group"]}\', '
-                f'\'{data["files"]}\', '
-                f'\'{data["task"]}\''
-                f');'
+            order_db.create_english_order(
+                data['order_id'],
+                data['customer_id'],
+                data['select_object'],
+                data['files'],
+                data['user_group'],
+                data['task'],
             )
-            conn.commit()
 
         await message.reply(
             'Дякуємо за замовлення. Скоро звами зв\'яжуться наші менеджери',
@@ -165,6 +146,8 @@ async def input_task(message: types.Message, state: FSMContext):
             ADMIN_CHAT,
             data['files']
         )
+
+        del order_db
 
         await state.reset_state(with_data=True)
 

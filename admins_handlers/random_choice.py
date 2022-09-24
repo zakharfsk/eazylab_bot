@@ -1,34 +1,19 @@
 import logging
 import random
 
-import psycopg2
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.builtin import Command
 
-from config import DATABASE, HOST, OWNER, PASSWORD, SECOND_MAN, USER
+from config import OWNER, SECOND_MAN
 from create_bot import bot
-
-username = USER
-host = HOST
-database = DATABASE
-password = PASSWORD
-port = 5432
+from database.db import User
 
 
 async def choice_winner(message: types.Message):
     try:
-        conn = psycopg2.connect(
-            user=username,
-            host=host,
-            database=database,
-            password=password,
-            port=port
-        )
 
-        cursor = conn.cursor()
-
-        cursor.execute(f'SELECT id FROM public.user_info')
-        users_ids = cursor.fetchall()
+        user_db = User()
+        users_ids = user_db.get_all_users()
 
         winners = []
         awards = [
@@ -49,13 +34,10 @@ async def choice_winner(message: types.Message):
             if winner.user.id != OWNER and winner.user.id != SECOND_MAN and winner.user.id != ENGLISH_MAN_1 and winner.user.id != ENGLISH_MAN_2:
                 await message.answer(f'{winner.user.mention} {awards[i]}')
 
+        del user_db
+
     except Exception as e:
         logging.exception(e)
-
-    finally:
-        if conn:
-            cursor.close()
-            conn.close()
 
 
 def register_handlers_choice_winner(dp: Dispatcher):

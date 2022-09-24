@@ -1,24 +1,17 @@
-import uuid
 import json
 import logging
 import uuid
 
-import psycopg2
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config import USER, HOST, DATABASE, PASSWORD, OWNER, ADMIN_CHAT, labaratories_buttons, \
+from config import OWNER, ADMIN_CHAT, labaratories_buttons, \
     select_object_buttons
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, labaratories_keyboard, start_menu, cancel_keyboard
-
-username = USER
-host = HOST
-database = DATABASE
-password = PASSWORD
-port = 5432
+from database.db import Orders
 
 
 class Order(StatesGroup):
@@ -128,15 +121,7 @@ async def input_zvit(message: types.Message, state: FSMContext):
         with open('data/all_price/price_programming.json', 'r') as f:
             price = json.load(f)
 
-        conn = psycopg2.connect(
-            user=username,
-            host=host,
-            database=database,
-            password=password,
-            port=port
-        )
-
-        cursor = conn.cursor()
+        order_db = Orders()
 
         z = message.text.split()
         payment: types.ChatMember = await bot.get_chat_member(OWNER, OWNER)
@@ -147,21 +132,15 @@ async def input_zvit(message: types.Message, state: FSMContext):
             data = await state.get_data()
 
             if message.from_user.id != OWNER:
-                cursor.execute(
-                    f'INSERT INTO public.order_info_programming('
-                    f'id_order, id_customer, name_object, '
-                    f'number_lab, variant_lab, tasks, zvit) '
-                    f'VALUES ('
-                    f'{data["order_id"]}, '
-                    f'{data["customer_id"]}, '
-                    f'\'{data["select_object"]}\', '
-                    f'\'{data["number_lab"]}\', '
-                    f'{data["variant_lab"]}, '
-                    f'\'{data["task"]}\', '
-                    f'\'{data["zvit"]}\''
-                    f');'
+                order_db.create_order_programming(
+                    {data["order_id"]},
+                    {data["customer_id"]},
+                    {data["select_object"]},
+                    {data["number_lab"]},
+                    {data["variant_lab"]},
+                    {data["task"]},
+                    {data["zvit"]}
                 )
-                conn.commit()
 
             number_lab = data['number_lab']
             zvit = data['zvit']
@@ -207,12 +186,10 @@ async def input_zvit(message: types.Message, state: FSMContext):
         else:
             await message.reply('Неправильний ввод. Будь ласка вкажіть правильно!')
 
+        del order_db
+
     except Exception as e:
         logging.exception(e)
-    finally:
-        if conn:
-            cursor.close()
-            conn.close()
 
 
 def register_handlers_programming(dp: Dispatcher):

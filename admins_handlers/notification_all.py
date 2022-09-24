@@ -1,22 +1,16 @@
 import asyncio
 import logging
 
-import psycopg2
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import Command, Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import BotBlocked
 
-from config import OWNER, SECOND_MAN, CHAT, HOST, PASSWORD, USER, DATABASE
+from config import OWNER, SECOND_MAN, CHAT
 from create_bot import bot
 from create_keyboards.keyboards import start_menu
-
-username = USER
-host = HOST
-database = DATABASE
-password = PASSWORD
-port = 5432
+from database.db import User
 
 
 class SendMessageAllUsers(StatesGroup):
@@ -54,18 +48,8 @@ async def send_text_all_users(message: types.Message, state: FSMContext):
     try:
         message_for_sending = message.text
 
-        conn = psycopg2.connect(
-            user=username,
-            host=host,
-            database=database,
-            password=password,
-            port=port
-        )
-
-        cursor = conn.cursor()
-
-        cursor.execute(f'SELECT id FROM public.user_info')
-        users_ids = cursor.fetchall()
+        user_db = User()
+        users_ids = user_db.get_all_users()
 
         await message.answer(
             'Розсилка почалась. Очікуйте повідомлення про її закінчення.',
@@ -74,16 +58,13 @@ async def send_text_all_users(message: types.Message, state: FSMContext):
 
         for i in range(len(users_ids)):
             try:
-
                 await bot.send_message(
                     users_ids[i][0],
                     f'{message_for_sending}'
                 )
-
                 await asyncio.sleep(0.3)
             except BotBlocked:
-                cursor.execute(f'DELETE FROM public.user_info WHERE id = {users_ids[i][0]}')
-                conn.commit()
+                user_db.delete_user(users_ids[i][0])
                 await message.answer(f'Видалено: {users_ids[i][0]}')
 
         info_about_sending = await bot.send_message(
@@ -97,7 +78,7 @@ async def send_text_all_users(message: types.Message, state: FSMContext):
             info_about_sending.message_id,
             disable_notification=False
         )
-
+        del user_db
         await state.reset_state(with_data=True)
 
     except Exception as e:

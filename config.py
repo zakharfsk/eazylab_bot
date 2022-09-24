@@ -1,6 +1,3 @@
-import os
-
-
 OWNER = 618042376  # Zakhar
 SECOND_MAN = 876045214  # Vadim
 CHAT = -1001703899156  # General Chat

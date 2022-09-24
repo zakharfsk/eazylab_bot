@@ -8,17 +8,12 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config import USER, HOST, DATABASE, PASSWORD, OWNER, ADMIN_CHAT, \
+from config import OWNER, ADMIN_CHAT, \
     select_object_buttons
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu, cancel_keyboard, \
     idz_hight_math_keyboard, idz_hight_math_buttons
-
-username = USER
-host = HOST
-database = DATABASE
-password = PASSWORD
-port = 5432
+from database.db import Orders
 
 
 class Order(StatesGroup):
@@ -105,15 +100,7 @@ async def input_number_in_list(message: types.Message, state: FSMContext):
 async def input_pack_type(message: types.Message, state: FSMContext):
     try:
 
-        conn = psycopg2.connect(
-            user=username,
-            host=host,
-            database=database,
-            password=password,
-            port=port
-        )
-
-        cursor = conn.cursor()
+        order_db = Orders()
 
         number_in_list = message.text
         payment: types.ChatMember = await bot.get_chat_member(OWNER, OWNER)
@@ -122,20 +109,15 @@ async def input_pack_type(message: types.Message, state: FSMContext):
         data = await state.get_data()
 
         if message.from_user.id != OWNER:
-            cursor.execute(
-                f'INSERT INTO public.order_info_hight_math('
-                f'id_order, id_customer, name_object, '
-                f'number_idz, user_group, number_in_list) '
-                f'VALUES ('
-                f'{data["order_id"]}, '
-                f'{data["customer_id"]}, '
-                f'\'{data["select_object"]}\', '
-                f'\'{data["number_idz"]}\', '
-                f'\'{data["number_group"]}\', '
-                f'\'{data["number_in_list"]}\''
-                f');'
+
+            order_db.create_order_math(
+                {data["order_id"]},
+                {data["customer_id"]},
+                {data["select_object"]},
+                {data["number_idz"]},
+                {data["number_group"]},
+                {data["number_in_list"]},
             )
-            conn.commit()
 
         await message.reply('Дякуємо за замовлення. Скоро звами зв\'яжуться наші менеджери', reply_markup=start_menu())
 
@@ -167,14 +149,12 @@ async def input_pack_type(message: types.Message, state: FSMContext):
             f'Номер в списку: {data["number_in_list"]}\n'
             )
 
+        del order_db
+
         await state.reset_state(with_data=True)
 
     except Exception as e:
         logging.exception(e)
-    finally:
-        if conn:
-            cursor.close()
-            conn.close()
 
 
 def register_handlers_math(dp: Dispatcher):
