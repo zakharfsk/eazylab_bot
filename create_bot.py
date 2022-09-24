@@ -1,9 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from dotenv import load_dotenv
-from config import TOKEN
 
-load_dotenv()
+from config import TOKEN
 
 storage = MemoryStorage()
 

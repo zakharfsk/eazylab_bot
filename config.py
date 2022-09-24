@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 OWNER = 618042376  # Zakhar
 SECOND_MAN = 876045214  # Vadim
