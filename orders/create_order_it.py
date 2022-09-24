@@ -1,8 +1,6 @@
 import logging
-import logging
 import uuid
 
-import psycopg2
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text

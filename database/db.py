@@ -13,6 +13,11 @@ class DataBase:
             port=5432
         )
         self.cursor = self.conn.cursor()
+        print('Connected to database')
+        print(os.getenv('USER'))
+        print(os.getenv('HOST'))
+        print(os.getenv('DATABASE'))
+        print(os.getenv('PASSWORD'))
 
     def __del__(self):
         self.conn.commit()
