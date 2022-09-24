@@ -1,18 +1,19 @@
 import os
 import logging
-
-import psycopg2
+import mysql.connector
 
 
 class DataBase:
+    config = {
+        'user': os.getenv('USER_DB'),
+        'password': os.getenv('PASSWORD_DB'),
+        'host': os.getenv('HOST_DB'),
+        'database': os.getenv('DATABASE_DB'),
+        'raise_on_warnings': True
+    }
+
     def __int__(self):
-        self.conn = psycopg2.connect(
-            user=os.getenv('USER_DB'),
-            host=os.getenv('HOST_DB'),
-            database=os.getenv('DATABASE_DB'),
-            password=os.getenv('PASSWORD_DB'),
-            port=5432
-        )
+        self.conn = mysql.connector.connect(**self.config)
         self.cursor = self.conn.cursor()
         logging.info('Connected to database')
 
