@@ -5,7 +5,7 @@ from aiogram import executor, types, Bot, Dispatcher
 from config import OWNER
 from create_bot import dp, bot
 
-logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
+logging.basicConfig(filename="logging.log", format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
                     level=logging.INFO)
 
 from handlers import *
