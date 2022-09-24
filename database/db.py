@@ -13,18 +13,19 @@ class DataBase:
             password=os.getenv('PASSWORD'),
             port=5432
         )
-        self.cursor = self.conn.cursor()
-        logging.info('Connected to database')
         logging.info(os.getenv('USER'))
         logging.info(os.getenv('HOST'))
         logging.info(os.getenv('DATABASE'))
         logging.info(os.getenv('PASSWORD'))
+        self.cursor = self.conn.cursor()
+        logging.info('Connected to database')
 
     def __del__(self):
         self.conn.commit()
         if self.conn:
             self.cursor.close()
             self.conn.close()
+            logging.info('Database connection closed.')
 
 
 class User(DataBase):
