@@ -74,6 +74,6 @@ async def set_commands(bt: Bot):
 
 
 if __name__ == '__main__':
-    with db:
-        db.create_tables(__all__)
+    db.connect()
+    db.create_tables(__all__)
     executor.start_polling(dp, skip_updates=True, on_startup=on_start_bot)
