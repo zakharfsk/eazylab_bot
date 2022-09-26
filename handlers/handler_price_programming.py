@@ -1,7 +1,6 @@
-import logging
-
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 from config import labaratories_buttons
 from create_keyboards.keyboards import labaratories_keyboard
@@ -20,7 +19,7 @@ async def laboratories_numb1(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb2(message: types.Message):
@@ -38,7 +37,7 @@ async def laboratories_numb2(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb3(message: types.Message):
@@ -56,7 +55,7 @@ async def laboratories_numb3(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb4(message: types.Message):
@@ -71,7 +70,7 @@ async def laboratories_numb4(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb5(message: types.Message):
@@ -87,7 +86,7 @@ async def laboratories_numb5(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb6(message: types.Message):
@@ -105,7 +104,7 @@ async def laboratories_numb6(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb7(message: types.Message):
@@ -119,7 +118,7 @@ async def laboratories_numb7(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_numb8(message: types.Message):
@@ -133,18 +132,15 @@ async def laboratories_numb8(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_price_programming(dp: Dispatcher):
-    try:
-        dp.register_message_handler(laboratories_numb1, Text(equals=labaratories_buttons[0]))
-        dp.register_message_handler(laboratories_numb2, Text(equals=labaratories_buttons[1]))
-        dp.register_message_handler(laboratories_numb3, Text(equals=labaratories_buttons[2]))
-        dp.register_message_handler(laboratories_numb4, Text(equals=labaratories_buttons[3]))
-        dp.register_message_handler(laboratories_numb5, Text(equals=labaratories_buttons[4]))
-        dp.register_message_handler(laboratories_numb6, Text(equals=labaratories_buttons[5]))
-        dp.register_message_handler(laboratories_numb7, Text(equals=labaratories_buttons[6]))
-        dp.register_message_handler(laboratories_numb8, Text(equals=labaratories_buttons[7]))
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(laboratories_numb1, Text(equals=labaratories_buttons[0]))
+    dp.register_message_handler(laboratories_numb2, Text(equals=labaratories_buttons[1]))
+    dp.register_message_handler(laboratories_numb3, Text(equals=labaratories_buttons[2]))
+    dp.register_message_handler(laboratories_numb4, Text(equals=labaratories_buttons[3]))
+    dp.register_message_handler(laboratories_numb5, Text(equals=labaratories_buttons[4]))
+    dp.register_message_handler(laboratories_numb6, Text(equals=labaratories_buttons[5]))
+    dp.register_message_handler(laboratories_numb7, Text(equals=labaratories_buttons[6]))
+    dp.register_message_handler(laboratories_numb8, Text(equals=labaratories_buttons[7]))

@@ -2,6 +2,7 @@ import logging
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 from config import subject_buttons
 from create_keyboards.keyboards import subject_keyboard
@@ -15,11 +16,8 @@ async def see_price(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_see_price(dp: Dispatcher):
-    try:
-        dp.register_message_handler(see_price, Text(equals='👨‍🏫 Подивитися прайс'))
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(see_price, Text(equals='👨‍🏫 Подивитися прайс'))

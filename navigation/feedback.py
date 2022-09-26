@@ -4,6 +4,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from loguru import logger
 
 from config import start_buttons, ADMIN_CHAT
 from create_bot import bot
@@ -22,7 +23,7 @@ async def takes_feedback(message: types.Message, state: FSMContext):
             reply_markup=types.ReplyKeyboardMarkup(resize_keyboard=True).add('Отмена')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def cancel_send_feedback(message: types.Message, state: FSMContext):
@@ -38,7 +39,7 @@ async def cancel_send_feedback(message: types.Message, state: FSMContext):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def send_feedback(message: types.Message, state: FSMContext):
@@ -61,7 +62,7 @@ async def send_feedback(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=True)
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_message_handler_feedback(dp: Dispatcher):

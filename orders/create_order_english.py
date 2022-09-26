@@ -1,15 +1,16 @@
-import logging
 import uuid
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from loguru import logger
 
 from config import OWNER, select_object_buttons, ADMIN_CHAT
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu
 from database.db import Orders
+from database.models import OrderEnglish
 
 
 class Order(StatesGroup):
@@ -25,7 +26,7 @@ async def start_order_english(message: types.Message, state: FSMContext):
         await Order.waiting_subject.set()
         await message.reply('Виберіть предмет.', reply_markup=subject_keyboard(select_object_buttons).add('Отмена'))
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def cancel_order(message: types.Message, state: FSMContext):
@@ -42,7 +43,7 @@ async def cancel_order(message: types.Message, state: FSMContext):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_subject(message: types.Message, state: FSMContext):
@@ -61,7 +62,7 @@ async def input_subject(message: types.Message, state: FSMContext):
                 'Нажаль такого предмета немає'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_files(message: types.Message, state: FSMContext):
@@ -72,7 +73,7 @@ async def input_files(message: types.Message, state: FSMContext):
         await Order.next()
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_group(message: types.Message, state: FSMContext):
@@ -85,7 +86,7 @@ async def input_group(message: types.Message, state: FSMContext):
         await Order.next()
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_task(message: types.Message, state: FSMContext):
@@ -99,13 +100,13 @@ async def input_task(message: types.Message, state: FSMContext):
         order_db = Orders()
 
         if message.from_user.id != OWNER:
-            order_db.create_english_order(
-                data['order_id'],
-                data['customer_id'],
-                data['select_object'],
-                data['files'],
-                data['user_group'],
-                data['task'],
+            OrderEnglish.create(
+                id_order=data['order_id'],
+                id_customer=data['customer_id'],
+                name_object=data['select_object'],
+                files=data['files'],
+                user_group=data['user_group'],
+                task=data['task']
             )
 
         await message.reply(
@@ -152,19 +153,16 @@ async def input_task(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=True)
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_message_handler_create_order_english(dp: Dispatcher):
-    try:
-        dp.register_message_handler(start_order_english, Text(equals='💸 Зробити замовлення'), state=None)
-        dp.register_message_handler(cancel_order, state="*", commands=['back'])
-        dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
-        dp.register_message_handler(input_subject, Text(equals='Англійська мова'),
-                                    state=Order.waiting_subject)
-        dp.register_message_handler(input_files, content_types=types.ContentTypes.DOCUMENT,
-                                    state=Order.waiting_input_files)
-        dp.register_message_handler(input_group, state=Order.waiting_input_group)
-        dp.register_message_handler(input_task, state=Order.waiting_input_tasks)
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(start_order_english, Text(equals='💸 Зробити замовлення'), state=None)
+    dp.register_message_handler(cancel_order, state="*", commands=['back'])
+    dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
+    dp.register_message_handler(input_subject, Text(equals='Англійська мова'),
+                                state=Order.waiting_subject)
+    dp.register_message_handler(input_files, content_types=types.ContentTypes.DOCUMENT,
+                                state=Order.waiting_input_files)
+    dp.register_message_handler(input_group, state=Order.waiting_input_group)
+    dp.register_message_handler(input_task, state=Order.waiting_input_tasks)

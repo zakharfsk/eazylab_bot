@@ -1,7 +1,6 @@
-import aiogram
-import logging
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 from create_bot import bot
 from create_keyboards.keyboards import instruction_keyboard
@@ -34,7 +33,7 @@ async def how_to_used_bot(message: types.Message):
             reply_markup=instruction_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def prices(message: types.Message):
@@ -47,7 +46,7 @@ async def prices(message: types.Message):
                 caption=f'{phrases_price[i]}'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def how_correctly_take_order(message: types.Message):
@@ -59,7 +58,7 @@ async def how_correctly_take_order(message: types.Message):
                 caption=f'{phrases_order[i]}'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def payments(message: types.Message):
@@ -72,14 +71,11 @@ async def payments(message: types.Message):
                     'Виконання завдання начинається лише після оплати'
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handler_how_to_used_bot(dp: Dispatcher):
-    try:
-        dp.register_message_handler(how_to_used_bot, Text(equals='📝 Інструкція використання'))
-        dp.register_message_handler(prices, Text(equals='Ціни'))
-        dp.register_message_handler(how_correctly_take_order, Text(equals='Як оформити правильно заказ?'))
-        dp.register_message_handler(payments, Text(equals='Оплата'))
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(how_to_used_bot, Text(equals='📝 Інструкція використання'))
+    dp.register_message_handler(prices, Text(equals='Ціни'))
+    dp.register_message_handler(how_correctly_take_order, Text(equals='Як оформити правильно заказ?'))
+    dp.register_message_handler(payments, Text(equals='Оплата'))

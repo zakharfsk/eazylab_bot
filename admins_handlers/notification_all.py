@@ -1,16 +1,16 @@
 import asyncio
-import logging
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import Command, Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import BotBlocked
+from loguru import logger
 
 from config import OWNER, SECOND_MAN, CHAT
 from create_bot import bot
 from create_keyboards.keyboards import start_menu
-from database.db import User
+from database.models import Users
 
 
 class SendMessageAllUsers(StatesGroup):
@@ -25,7 +25,7 @@ async def input_text_for_message(message: types.Message, state: FSMContext):
             reply_markup=types.ReplyKeyboardMarkup(resize_keyboard=True).add('Отмена розсилки')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def cancel_send_message_all_users(message: types.Message, state: FSMContext):
@@ -41,35 +41,32 @@ async def cancel_send_message_all_users(message: types.Message, state: FSMContex
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def send_text_all_users(message: types.Message, state: FSMContext):
     try:
         message_for_sending = message.text
 
-        user_db = User()
-        users_ids = user_db.get_all_users()
-
         await message.answer(
             'Розсилка почалась. Очікуйте повідомлення про її закінчення.',
             reply_markup=start_menu()
         )
 
-        for i in range(len(users_ids)):
+        for person in Users.select():
             try:
                 await bot.send_message(
-                    users_ids[i][0],
+                    person.user_id,
                     f'{message_for_sending}'
                 )
                 await asyncio.sleep(0.3)
             except BotBlocked:
-                user_db.delete_user(users_ids[i][0])
-                await message.answer(f'Видалено: {users_ids[i][0]}')
+                Users.delete().where(Users.user_id == person.user_id)
+                await message.answer(f'Видалено: {person.user_id}')
 
         info_about_sending = await bot.send_message(
             CHAT,
-            f'Повідомлення було надіслане {len(users_ids)} користувачам бота\n\n' \
+            f'Повідомлення було надіслане {len(Users.select())} користувачам бота\n\n'
             f'Текст повідомлення:\n{message_for_sending}',
         )
 
@@ -78,21 +75,17 @@ async def send_text_all_users(message: types.Message, state: FSMContext):
             info_about_sending.message_id,
             disable_notification=False
         )
-        del user_db
         await state.reset_state(with_data=True)
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_rozsilaca_messages(dp: Dispatcher):
-    try:
-        dp.register_message_handler(input_text_for_message, Command('rozsilca'),
-                                    lambda message: OWNER == message.from_user.id or SECOND_MAN == message.from_user.id)
-        dp.register_message_handler(cancel_send_message_all_users,
-                                    Text(equals='Отмена розсилки'),
-                                    state="*")
-        dp.register_message_handler(send_text_all_users,
-                                    state=SendMessageAllUsers.start_sendings)
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(input_text_for_message, Command('rozsilca'),
+                                lambda message: OWNER == message.from_user.id or SECOND_MAN == message.from_user.id)
+    dp.register_message_handler(cancel_send_message_all_users,
+                                Text(equals='Отмена розсилки'),
+                                state="*")
+    dp.register_message_handler(send_text_all_users,
+                                state=SendMessageAllUsers.start_sendings)

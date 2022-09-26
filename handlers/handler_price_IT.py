@@ -1,7 +1,6 @@
-import logging
-
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 from config import it_buttons
 from create_keyboards.keyboards import it_keyboard
@@ -15,7 +14,7 @@ async def laboratories_it_numb1(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb2(message: types.Message):
@@ -26,7 +25,7 @@ async def laboratories_it_numb2(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb3(message: types.Message):
@@ -37,7 +36,7 @@ async def laboratories_it_numb3(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb4(message: types.Message):
@@ -49,7 +48,7 @@ async def laboratories_it_numb4(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb5(message: types.Message):
@@ -61,7 +60,7 @@ async def laboratories_it_numb5(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb6(message: types.Message):
@@ -72,7 +71,7 @@ async def laboratories_it_numb6(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb7(message: types.Message):
@@ -85,7 +84,7 @@ async def laboratories_it_numb7(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def laboratories_it_numb8(message: types.Message):
@@ -96,18 +95,15 @@ async def laboratories_it_numb8(message: types.Message):
             reply_markup=it_keyboard().add('Назад в меню')
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_price_IT(dp: Dispatcher):
-    try:
-        dp.register_message_handler(laboratories_it_numb1, Text(equals=it_buttons[0]))
-        dp.register_message_handler(laboratories_it_numb2, Text(equals=it_buttons[1]))
-        dp.register_message_handler(laboratories_it_numb3, Text(equals=it_buttons[2]))
-        dp.register_message_handler(laboratories_it_numb4, Text(equals=it_buttons[3]))
-        dp.register_message_handler(laboratories_it_numb5, Text(equals=it_buttons[4]))
-        dp.register_message_handler(laboratories_it_numb6, Text(equals=it_buttons[5]))
-        dp.register_message_handler(laboratories_it_numb7, Text(equals=it_buttons[6]))
-        dp.register_message_handler(laboratories_it_numb8, Text(equals=it_buttons[7]))
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(laboratories_it_numb1, Text(equals=it_buttons[0]))
+    dp.register_message_handler(laboratories_it_numb2, Text(equals=it_buttons[1]))
+    dp.register_message_handler(laboratories_it_numb3, Text(equals=it_buttons[2]))
+    dp.register_message_handler(laboratories_it_numb4, Text(equals=it_buttons[3]))
+    dp.register_message_handler(laboratories_it_numb5, Text(equals=it_buttons[4]))
+    dp.register_message_handler(laboratories_it_numb6, Text(equals=it_buttons[5]))
+    dp.register_message_handler(laboratories_it_numb7, Text(equals=it_buttons[6]))
+    dp.register_message_handler(laboratories_it_numb8, Text(equals=it_buttons[7]))

@@ -1,19 +1,21 @@
-import logging
 import random
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.builtin import Command
+from loguru import logger
 
 from config import OWNER, SECOND_MAN
 from create_bot import bot
-from database.db import User
+from database.models import Users
 
 
 async def choice_winner(message: types.Message):
     try:
 
-        user_db = User()
-        users_ids = user_db.get_all_users()
+        users_ids = []
+
+        for user in Users.select():
+            users_ids.append(user)
 
         winners = []
         awards = [
@@ -25,27 +27,22 @@ async def choice_winner(message: types.Message):
         ]
 
         for i in range(5):
-            winners.append(random.choice(users_ids)[0])
+            winners.append(random.choice(users_ids))
 
         for i in range(len(winners)):
 
             winner: types.ChatMember = await bot.get_chat_member(winners[i], winners[i])
 
-            if winner.user.id != OWNER and winner.user.id != SECOND_MAN and winner.user.id != ENGLISH_MAN_1 and winner.user.id != ENGLISH_MAN_2:
+            if winner.user.id != OWNER and winner.user.id != SECOND_MAN:
                 await message.answer(f'{winner.user.mention} {awards[i]}')
 
-        del user_db
-
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_choice_winner(dp: Dispatcher):
-    try:
-        dp.register_message_handler(
-            choice_winner,
-            Command('choice_winner'),
-            lambda message: OWNER == message.from_user.id or SECOND_MAN == message.from_user.id
-        )
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(
+        choice_winner,
+        Command('choice_winner'),
+        lambda message: OWNER == message.from_user.id or SECOND_MAN == message.from_user.id
+    )

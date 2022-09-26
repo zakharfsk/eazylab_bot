@@ -1,17 +1,16 @@
-import json
-import logging
 import uuid
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from loguru import logger
 
 from config import OWNER, ADMIN_CHAT, labaratories_buttons, \
     select_object_buttons
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, labaratories_keyboard, start_menu, cancel_keyboard
-from database.db import Orders
+from database.models import OrderProgramming
 
 
 class Order(StatesGroup):
@@ -28,7 +27,7 @@ async def start_order(message: types.Message, state: FSMContext):
         await Order.waiting_subject.set()
         await message.reply('Виберіть предмет.', reply_markup=subject_keyboard(select_object_buttons).add('Отмена'))
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def cancel_order(message: types.Message, state: FSMContext):
@@ -45,7 +44,7 @@ async def cancel_order(message: types.Message, state: FSMContext):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_subject(message: types.Message, state: FSMContext):
@@ -62,7 +61,7 @@ async def input_subject(message: types.Message, state: FSMContext):
                 'Нажаль такого предмета немає'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_number_lab(message: types.Message, state: FSMContext):
@@ -79,7 +78,7 @@ async def input_number_lab(message: types.Message, state: FSMContext):
                 'Нажаль в нас немає такої лабораторної'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_lab_variant(message: types.Message, state: FSMContext):
@@ -96,7 +95,7 @@ async def input_lab_variant(message: types.Message, state: FSMContext):
         except ValueError:
             await message.reply('Номер варіанта має бути числом.')
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_task(message: types.Message, state: FSMContext):
@@ -112,17 +111,11 @@ async def input_task(message: types.Message, state: FSMContext):
         except ValueError:
             await message.reply('Кількість завданнь має бути числом.')
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_zvit(message: types.Message, state: FSMContext):
     try:
-
-        with open('data/all_price/price_programming.json', 'r') as f:
-            price = json.load(f)
-
-        order_db = Orders()
-
         z = message.text.split()
         payment: types.ChatMember = await bot.get_chat_member(OWNER, OWNER)
 
@@ -132,19 +125,15 @@ async def input_zvit(message: types.Message, state: FSMContext):
             data = await state.get_data()
 
             if message.from_user.id != OWNER:
-                order_db.create_order_programming(
-                    {data["order_id"]},
-                    {data["customer_id"]},
-                    {data["select_object"]},
-                    {data["number_lab"]},
-                    {data["variant_lab"]},
-                    {data["task"]},
-                    {data["zvit"]}
+                OrderProgramming.create(
+                    id_order=data['order_id'],
+                    id_customer=data['customer_id'],
+                    name_object=data['select_object'],
+                    number_lab=data['number_lab'],
+                    variant_lab=data['variant_lab'],
+                    tasks=str(data['task']),
+                    zvit=data['zvit']
                 )
-
-            number_lab = data['number_lab']
-            zvit = data['zvit']
-            task = data['task']
 
             await message.reply('Дякуємо за замовлення. Скоро звами зв\'яжуться наші менеджери',
                                 reply_markup=start_menu())
@@ -161,7 +150,6 @@ async def input_zvit(message: types.Message, state: FSMContext):
                 f'З звітами: {data["zvit"]}\n'
                 f'Варіант Лабораторної: {data["variant_lab"]}\n'
                 f'Завдання: {data["task"]}\n\n'
-                f'Ціна: {price[0][f"{number_lab}"][f"{zvit}"][f"{task}"]} грн.\n'
                 'Час виконання: 1-2 дня\n'
                 f'Щоб оплатити зверніться до {payment.user.mention}'
             )
@@ -177,8 +165,7 @@ async def input_zvit(message: types.Message, state: FSMContext):
                 f'Номер лабораторної: {data["number_lab"]}\n'
                 f'З звітами: {data["zvit"]}\n'
                 f'Варіант Лабораторної: {data["variant_lab"]}\n'
-                f'Завдання: {data["task"]}\n\n'
-                f'Ціна: {price[0][f"{number_lab}"][f"{zvit}"][f"{task}"]} грн.\n'
+                f'Завдання: {data["task"]}'
             )
 
             await state.reset_state(with_data=True)
@@ -186,21 +173,16 @@ async def input_zvit(message: types.Message, state: FSMContext):
         else:
             await message.reply('Неправильний ввод. Будь ласка вкажіть правильно!')
 
-        del order_db
-
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_programming(dp: Dispatcher):
-    try:
-        dp.register_message_handler(start_order, Text(equals='💸 Зробити замовлення'), state=None)
-        dp.register_message_handler(cancel_order, state="*", commands=['back'])
-        dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
-        dp.register_message_handler(input_subject, Text(equals='Програмування'), state=Order.waiting_subject)
-        dp.register_message_handler(input_number_lab, state=Order.waiting_number_lab)
-        dp.register_message_handler(input_lab_variant, state=Order.waiting_variant)
-        dp.register_message_handler(input_task, state=Order.waiting_zvit)
-        dp.register_message_handler(input_zvit, state=Order.waiting_count_task)
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(start_order, Text(equals='💸 Зробити замовлення'), state=None)
+    dp.register_message_handler(cancel_order, state="*", commands=['back'])
+    dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
+    dp.register_message_handler(input_subject, Text(equals='Програмування'), state=Order.waiting_subject)
+    dp.register_message_handler(input_number_lab, state=Order.waiting_number_lab)
+    dp.register_message_handler(input_lab_variant, state=Order.waiting_variant)
+    dp.register_message_handler(input_task, state=Order.waiting_zvit)
+    dp.register_message_handler(input_zvit, state=Order.waiting_count_task)

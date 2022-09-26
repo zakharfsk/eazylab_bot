@@ -1,19 +1,17 @@
 import uuid
-import logging
-import uuid
 
-import psycopg2
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from loguru import logger
 
 from config import OWNER, ADMIN_CHAT, \
     select_object_buttons
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu, cancel_keyboard, \
     idz_hight_math_keyboard, idz_hight_math_buttons
-from database.db import Orders
+from database.models import OrderHigherMath
 
 
 class Order(StatesGroup):
@@ -29,7 +27,7 @@ async def start_order(message: types.Message, state: FSMContext):
         await Order.waiting_subject.set()
         await message.reply('Виберіть предмет.', reply_markup=subject_keyboard(select_object_buttons).add('Отмена'))
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def cancel_order(message: types.Message, state: FSMContext):
@@ -46,7 +44,7 @@ async def cancel_order(message: types.Message, state: FSMContext):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_subject(message: types.Message, state: FSMContext):
@@ -63,7 +61,7 @@ async def input_subject(message: types.Message, state: FSMContext):
                 'Нажаль такого предмета немає'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_number_group(message: types.Message, state: FSMContext):
@@ -79,7 +77,7 @@ async def input_number_group(message: types.Message, state: FSMContext):
                 'Нажаль в нас немає такого ІДЗ'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_number_in_list(message: types.Message, state: FSMContext):
@@ -94,14 +92,11 @@ async def input_number_in_list(message: types.Message, state: FSMContext):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_pack_type(message: types.Message, state: FSMContext):
     try:
-
-        order_db = Orders()
-
         number_in_list = message.text
         payment: types.ChatMember = await bot.get_chat_member(OWNER, OWNER)
 
@@ -109,14 +104,13 @@ async def input_pack_type(message: types.Message, state: FSMContext):
         data = await state.get_data()
 
         if message.from_user.id != OWNER:
-
-            order_db.create_order_math(
-                {data["order_id"]},
-                {data["customer_id"]},
-                {data["select_object"]},
-                {data["number_idz"]},
-                {data["number_group"]},
-                {data["number_in_list"]},
+            OrderHigherMath.create(
+                id_order=data['order_id'],
+                id_customer=data['customer_id'],
+                name_object=data['select_object'],
+                number_idz=data['number_idz'],
+                number_in_list=data['number_in_list'],
+                user_group=data["number_group"]
             )
 
         await message.reply('Дякуємо за замовлення. Скоро звами зв\'яжуться наші менеджери', reply_markup=start_menu())
@@ -147,24 +141,19 @@ async def input_pack_type(message: types.Message, state: FSMContext):
             f'Номер ІДЗ: {data["number_idz"]}\n'
             f'Група: {data["number_group"]}\n'
             f'Номер в списку: {data["number_in_list"]}\n'
-            )
-
-        del order_db
+        )
 
         await state.reset_state(with_data=True)
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_math(dp: Dispatcher):
-    try:
-        dp.register_message_handler(start_order, Text(equals='💸 Зробити замовлення'), state=None)
-        dp.register_message_handler(cancel_order, state="*", commands=['back'])
-        dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
-        dp.register_message_handler(input_subject, Text(equals='Вища математика'), state=Order.waiting_subject)
-        dp.register_message_handler(input_number_group, state=Order.waiting_number_idz)
-        dp.register_message_handler(input_number_in_list, state=Order.waiting_variant_idz)
-        dp.register_message_handler(input_pack_type, state=Order.waiting_pack_idz)
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(start_order, Text(equals='💸 Зробити замовлення'), state=None)
+    dp.register_message_handler(cancel_order, state="*", commands=['back'])
+    dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
+    dp.register_message_handler(input_subject, Text(equals='Вища математика'), state=Order.waiting_subject)
+    dp.register_message_handler(input_number_group, state=Order.waiting_number_idz)
+    dp.register_message_handler(input_number_in_list, state=Order.waiting_variant_idz)
+    dp.register_message_handler(input_pack_type, state=Order.waiting_pack_idz)

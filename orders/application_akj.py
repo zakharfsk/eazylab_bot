@@ -1,7 +1,6 @@
-import logging
-
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 from config import start_buttons, ADMIN_CHAT
 from create_bot import bot
@@ -24,11 +23,8 @@ async def get_applications(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_message_handler_get_applications(dp: Dispatcher):
-    try:
-        dp.register_message_handler(get_applications, Text(equals=start_buttons[4]), state="*")
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(get_applications, Text(equals=start_buttons[4]), state="*")

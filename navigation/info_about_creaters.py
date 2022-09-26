@@ -1,7 +1,6 @@
-import logging
-
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 
 async def informations(message: types.Message):
@@ -14,11 +13,8 @@ async def informations(message: types.Message):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_informations(dp: Dispatcher):
-    try:
-        dp.register_message_handler(informations, Text(equals='ℹ️ Інформація'))
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(informations, Text(equals='ℹ️ Інформація'))

@@ -1,16 +1,16 @@
-import logging
 import uuid
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from loguru import logger
 
 from config import OWNER, ADMIN_CHAT, \
     select_object_buttons, it_buttons
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu, cancel_keyboard, it_keyboard
-from database.db import Orders
+from database.models import OrderIt
 
 
 class Order(StatesGroup):
@@ -26,7 +26,7 @@ async def start_order(message: types.Message, state: FSMContext):
         await Order.waiting_subject.set()
         await message.reply('Виберіть предмет.', reply_markup=subject_keyboard(select_object_buttons).add('Отмена'))
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def cancel_order(message: types.Message, state: FSMContext):
@@ -43,7 +43,7 @@ async def cancel_order(message: types.Message, state: FSMContext):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_subject(message: types.Message, state: FSMContext):
@@ -60,7 +60,7 @@ async def input_subject(message: types.Message, state: FSMContext):
                 'Нажаль такого предмета немає'
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_number_lab_it(message: types.Message, state: FSMContext):
@@ -79,7 +79,7 @@ async def input_number_lab_it(message: types.Message, state: FSMContext):
             )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_name(message: types.Message, state: FSMContext):
@@ -89,7 +89,7 @@ async def input_name(message: types.Message, state: FSMContext):
         await Order.next()
         await message.reply('Вкажіть вашу групу.(в форматі КІ-21-2)')
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def input_group(message: types.Message, state: FSMContext):
@@ -105,16 +105,14 @@ async def input_group(message: types.Message, state: FSMContext):
             reply_markup=start_menu()
         )
 
-        order_db = Orders()
-
         if message.from_user.id != OWNER:
-            order_db.create_order_it(
-                data['order_id'],
-                data['customer_id'],
-                data['select_object'],
-                data['number_lab'],
-                data['name'],
-                data['user_group']
+            OrderIt.create(
+                id_customer=data.get('customer_id'),
+                id_order=data.get('order_id'),
+                name_object=data.get('select_object'),
+                number_lab=data.get('number_lab'),
+                first_name_and_last_name=data.get('name'),
+                user_group=data.get('user_group')
             )
 
         await message.answer(
@@ -145,23 +143,18 @@ async def input_group(message: types.Message, state: FSMContext):
             f'Група: {data["user_group"]}'
         )
 
-        del order_db
-
         await state.reset_state(with_data=True)
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_handlers_create_it(dp: Dispatcher):
-    try:
-        dp.register_message_handler(start_order, Text(equals='💸 Зробити замовлення'), state=None)
-        dp.register_message_handler(cancel_order, state="*", commands=['back'])
-        dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
-        dp.register_message_handler(input_subject, Text(equals='Інформаціїні технології'),
-                                    state=Order.waiting_subject)
-        dp.register_message_handler(input_number_lab_it, state=Order.waiting_number_lab_it)
-        dp.register_message_handler(input_name, state=Order.waiting_first_last_name)
-        dp.register_message_handler(input_group, state=Order.waiting_user_group)
-    except Exception as e:
-        logging.exception(e)
+    dp.register_message_handler(start_order, Text(equals='💸 Зробити замовлення'), state=None)
+    dp.register_message_handler(cancel_order, state="*", commands=['back'])
+    dp.register_message_handler(cancel_order, Text(equals='Отмена'), state="*")
+    dp.register_message_handler(input_subject, Text(equals='Інформаціїні технології'),
+                                state=Order.waiting_subject)
+    dp.register_message_handler(input_number_lab_it, state=Order.waiting_number_lab_it)
+    dp.register_message_handler(input_name, state=Order.waiting_first_last_name)
+    dp.register_message_handler(input_group, state=Order.waiting_user_group)

@@ -2,6 +2,7 @@ import logging
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
+from loguru import logger
 
 from config import web_buttons, OWNER
 from create_bot import bot
@@ -16,7 +17,7 @@ async def web_lab(message: types.Message):
             f'Якщо вас цікавить тільки якась частина, тоді пишить - {owner.user.mention} (для замовлення також)'
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 async def web_pract(message: types.Message):
@@ -38,7 +39,7 @@ async def web_pract(message: types.Message):
             f'Для замовлення пишить - {owner.user.mention}'
         )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 def register_message_handler_web(dp: Dispatcher):

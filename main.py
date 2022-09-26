@@ -1,17 +1,25 @@
 import logging
 
 from aiogram import executor, types, Bot, Dispatcher
+from loguru import logger
 
+from database.models import db, __all__
 from config import OWNER
 from create_bot import dp, bot
-
-logging.basicConfig(filename="logging.log", format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
-                    level=logging.INFO)
 
 from handlers import *
 from navigation import *
 from admins_handlers import *
 from orders import *
+
+logger.add(
+    "file.log",
+    format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {module}:{function}:{line} | {message}",
+    level="DEBUG",
+    enqueue=True,
+    backtrace=True,
+    diagnose=True
+)
 
 # ------------------------------Handlers-------------------------------------- #
 
@@ -49,20 +57,23 @@ random_choice.register_handlers_choice_winner(dp)
 
 # -------------------------------------------------------------------- #
 
-async def on_start_bot(dp: Dispatcher):
+async def on_start_bot(disp: Dispatcher):
     try:
-        await dp.bot.send_message(OWNER, 'Bot started!')
+        await disp.bot.send_message(OWNER, 'Bot started!')
         await set_commands(bot)
     except Exception as e:
         logging.exception(e)
 
 
-async def set_commands(bot: Bot):
-    await bot.set_my_commands([
+async def set_commands(bt: Bot):
+    await bt.set_my_commands([
         types.BotCommand(command='/start', description='Старт'),
         types.BotCommand(command='/back', description='Повернутись в головне меню'),
         types.BotCommand(command='/feedback', description='Відправити нам Ваш Feedback ^^')
     ])
 
 
-executor.start_polling(dp, skip_updates=True, on_startup=on_start_bot)
+if __name__ == '__main__':
+    with db:
+        db.create_tables(__all__)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_start_bot)
