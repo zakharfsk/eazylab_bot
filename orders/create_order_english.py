@@ -9,7 +9,6 @@ from loguru import logger
 from config import OWNER, select_object_buttons, ADMIN_CHAT
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu
-from database.db import Orders
 from database.models import OrderEnglish
 
 
