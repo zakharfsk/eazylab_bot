@@ -7,8 +7,7 @@ db = MySQLDatabase(
     user=os.getenv('USER_DB'),
     password=os.getenv('PASSWORD_DB'),
     host=os.getenv('HOST_DB'),
-    port=3306,
-    pragmas={'foreign_keys': 1}
+    port=3306
 )
 
 
