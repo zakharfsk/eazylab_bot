@@ -20,13 +20,14 @@ class DataBase:
 
     def __del__(self):
         self.conn.commit()
-        if self.conn:
-            self.cursor.close()
-            self.conn.close()
-            logging.info('Database connection closed.')
+        self.cursor.close()
+        self.conn.close()
+        logging.info('Database connection closed.')
 
 
 class User(DataBase):
+    def __init__(self):
+        super().__init__()
 
     def get_user_by_id(self, user_id: int) -> tuple:
         logging.info(os.getenv('USER_DB'))
