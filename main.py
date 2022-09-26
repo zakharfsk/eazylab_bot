@@ -1,4 +1,5 @@
 import logging
+import os
 
 from aiogram import executor, types, Bot, Dispatcher
 from loguru import logger
@@ -74,6 +75,7 @@ async def set_commands(bt: Bot):
 
 
 if __name__ == '__main__':
+    db.init(os.getenv('DATABASE_DB'))
     db.connect()
     db.create_tables(__all__)
     executor.start_polling(dp, skip_updates=True, on_startup=on_start_bot)
