@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from loguru import logger
 
 from config import OWNER, ADMIN_CHAT, \
-    select_object_buttons
+    select_object_buttons, CHAT
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu, cancel_keyboard, \
     idz_hight_math_keyboard, idz_hight_math_buttons
@@ -131,7 +131,7 @@ async def input_pack_type(message: types.Message, state: FSMContext):
         )
 
         await bot.send_message(
-            ADMIN_CHAT,
+            CHAT,
             f'ID заказа: {data["order_id"]}\n'
             f'ID замовника: {data["customer_id"]}\n'
             f'Username: {message.from_user.username}\n'

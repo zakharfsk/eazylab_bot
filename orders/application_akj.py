@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
 from loguru import logger
 
-from config import start_buttons, ADMIN_CHAT
+from config import start_buttons, ADMIN_CHAT, CHAT
 from create_bot import bot
 
 
@@ -14,7 +14,7 @@ async def get_applications(message: types.Message):
         )
 
         await bot.send_message(
-            ADMIN_CHAT,
+            CHAT,
             'Нова за\'явка на ГКР.\n'
             f'ID замовника: {message.from_user.id}\n'
             f'Username: {message.from_user.username}\n'

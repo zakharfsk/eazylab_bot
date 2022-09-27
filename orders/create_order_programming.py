@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from loguru import logger
 
 from config import OWNER, ADMIN_CHAT, labaratories_buttons, \
-    select_object_buttons
+    select_object_buttons, CHAT
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, labaratories_keyboard, start_menu, cancel_keyboard
 from database.models import OrderProgramming
@@ -155,7 +155,7 @@ async def input_zvit(message: types.Message, state: FSMContext):
             )
 
             await bot.send_message(
-                ADMIN_CHAT,
+                CHAT,
                 f'ID заказа: {data["order_id"]}\n'
                 f'ID замовника: {data["customer_id"]}\n'
                 f'Username: {message.from_user.username}\n'

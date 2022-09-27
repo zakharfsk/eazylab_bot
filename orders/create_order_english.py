@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from loguru import logger
 
-from config import OWNER, select_object_buttons, ADMIN_CHAT
+from config import OWNER, select_object_buttons, ADMIN_CHAT, CHAT
 from create_bot import bot
 from create_keyboards.keyboards import subject_keyboard, start_menu
 from database.models import OrderEnglish
@@ -96,8 +96,6 @@ async def input_task(message: types.Message, state: FSMContext):
 
         data = await state.get_data()
 
-        order_db = Orders()
-
         if message.from_user.id != OWNER:
             OrderEnglish.create(
                 id_order=data['order_id'],
@@ -113,41 +111,34 @@ async def input_task(message: types.Message, state: FSMContext):
             reply_markup=start_menu()
         )
 
-        await message.answer(
-            'Ваш чек.\n\n'
-            f'ID заказа: {data["order_id"]}\n'
-            f'ID замовника: {data["customer_id"]}\n'
-            f'Username: {message.from_user.username}\n'
-            f'First Name: {message.from_user.first_name}\n'
-            f'Last Name: {message.from_user.last_name}\n'
-            f'Предмет: {data["select_object"]}\n'
-            f'Група: {data["user_group"]}\n'
-            f'Завдання: {data["task"]}\n\n'
-            'Час виконання: 1-2 дня\n'
-            f'Щоб оплатити зверніться до {payments.user.mention}\n\n'
-            f'Файл який ви надіслали:'
-        )
-
-        await bot.send_document(message.from_user.id, data['files'])
-
-        await bot.send_message(
-            ADMIN_CHAT,
-            f'ID заказа: {data["order_id"]}\n'
-            f'ID замовника: {data["customer_id"]}\n'
-            f'Username: {message.from_user.username}\n'
-            f'First Name: {message.from_user.first_name}\n'
-            f'Last Name: {message.from_user.last_name}\n'
-            f'Предмет: {data["select_object"]}\n'
-            f'Група: {data["user_group"]}\n'
-            f'Завдання: {data["task"]}\n\n'
+        await message.answer_document(
+            data['files'],
+            caption='Ваш чек.\n\n'
+                    f'ID заказа: {data["order_id"]}\n'
+                    f'ID замовника: {data["customer_id"]}\n'
+                    f'Username: {message.from_user.username}\n'
+                    f'First Name: {message.from_user.first_name}\n'
+                    f'Last Name: {message.from_user.last_name}\n'
+                    f'Предмет: {data["select_object"]}\n'
+                    f'Група: {data["user_group"]}\n'
+                    f'Завдання: {data["task"]}\n\n'
+                    'Час виконання: 1-2 дня\n'
+                    f'Щоб оплатити зверніться до {payments.user.mention}\n\n'
+                    f'Файл який ви надіслали:'
         )
 
         await bot.send_document(
-            ADMIN_CHAT,
-            data['files']
+            CHAT,
+            data['files'],
+            caption=f'ID заказа: {data["order_id"]}\n'
+                    f'ID замовника: {data["customer_id"]}\n'
+                    f'Username: {message.from_user.username}\n'
+                    f'First Name: {message.from_user.first_name}\n'
+                    f'Last Name: {message.from_user.last_name}\n'
+                    f'Предмет: {data["select_object"]}\n'
+                    f'Група: {data["user_group"]}\n'
+                    f'Завдання: {data["task"]}\n\n'
         )
-
-        del order_db
 
         await state.reset_state(with_data=True)
 
